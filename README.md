@@ -1,0 +1,1 @@
+This is the code for lane detection based on the bsnake paper by Wang et al.
