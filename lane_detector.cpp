@@ -17,8 +17,8 @@ int main()
 {
 	//initialize important variables here
 	int n_segments=5;
-	int segments[5]={300, 230, 195, 120, 55};
-	Mat img_segments[5];
+	int segments[6]={0,80, 230, 285, 300,1000};
+	Mat img_segments;
 
 	cv::Mat img=cv::imread("images/l2.jpg", CV_LOAD_IMAGE_COLOR);
 	cv::resize(img, img, cv::Size(1000,1000));
@@ -40,13 +40,28 @@ int main()
 			break;
 	}
 
-	extract_segments(img_segments, edges, segments, n_segments);
-
 	vector<Vec4i> lines[n_segments];
+	//extract_segments(img_segments, edges, segments, n_segments);
+	for(int k=0;k<n_segments;k++)
+		{
+			img_segments=edges-edges;
+			for(int i=segments[k];i<segments[k+1];i++)
+				{
+					for(int j=0;j<1000;j++)
+					{
+						img_segments.at<uchar>(i,j)=edges.at<uchar>(i,j);
+						
+					}
+				}	
+
+				HoughLinesP(img_segments, lines[k], 1, CV_PI/180, 100, 0, 0 );
+		}
+
+	/*vector<Vec4i> lines[n_segments];
 	for(int i=0; i<n_segments ;i++)
 		HoughLinesP(img_segments[i], lines[i], 1, CV_PI/180, 100, 0, 0 );
-
-
+ 	cout<<"reached"<<endl;*/
+		
 	for(int j=0;j<n_segments;j++)
 	{
 	 for( size_t i = 0; i < lines[j].size(); i++ )
@@ -95,7 +110,7 @@ int main()
 
 				     		output.y=((pt1.x*pt2.y-pt1.y*pt2.x)*(pt3.y-pt4.y)-((pt3.x*pt4.y-pt3.y*pt4.x)*(pt1.y-pt2.y)))/((pt1.x-pt2.x)*(pt3.y-pt4.y)-(pt1.y-pt2.y)*(pt3.x-pt4.x));
 				     	}	
-				     	cout<<output.x<<" "<<output.y<<endl;
+				     	//cout<<output.x<<" "<<output.y<<endl;
 
 				     	if(output.x<1000&&output.y<1000&&output.x>0&&output.y>0)
 				     	
@@ -110,7 +125,7 @@ int main()
   	//find best row as horizon
   	int ctr;
   	int colmx=0;
-  	int maxctr;
+  	int maxctr=0;
 
   	for(int i=26;i<970;i++)
   		{
@@ -119,25 +134,33 @@ int main()
   				{
   					if(intersections[j].y<i+20&&intersections[j].y>i-20)
   					{
-  						ctr++;
-  						if(ctr>maxctr)
+  						if(intersections[j].y==i)
+  							ctr+=1000;
+  						else if(intersections[j].y<i+10&&intersections[j].y>i-10)
+  							ctr+=100;
+  						else
+  							ctr+=40;
+  						
+
+  					}
+  					
+
+  				}
+  				if(ctr>maxctr)
   						{
   							ctr=maxctr;
   							colmx=i;
 
   						}
 
-  					}
-
-  				}
-
   		}
+  		cout<<"max:"<<colmx<<endl;
   		Point p1,p2;
   		p1.x=0;
-  		p1.y=colmx;
-  		p2.x=1000;
-  		p2.y=colmx;
-  		 	line( img, p1, p2, Scalar(0,0,255), 3, CV_AA);
+  		p1.y=1000-colmx;
+  		p2.x=999;
+  		p2.y=1000-colmx;
+  		 	line( img, p1, p2, Scalar(255,0,0), 3, CV_AA);
 
 	imshow("original", img);
 	waitKey(0);
