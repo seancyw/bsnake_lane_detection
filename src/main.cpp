@@ -1,7 +1,7 @@
-#include"opencv/cv.h"
-#include<opencv2/highgui/highgui.hpp>
-#include<bits/stdc++.h>
-#include "lane_detector.h"
+
+
+#include  "../include/lane.hpp"
+
 
 using namespace cv;
 using namespace std;
@@ -17,14 +17,16 @@ int main()
 	Mat img_segments[5];
 	std::stringstream window_name;
 
-	cv::Mat img=cv::imread("images/l3.jpg", CV_LOAD_IMAGE_COLOR);
+	cv::Mat img=cv::imread("images/l7.jpg", CV_LOAD_IMAGE_COLOR);
 	cv::resize(img, img, cv::Size(1000,1000));
 	imshow("lanes", img);
 
+	img=removeShadow(img);
+
 	int max_lowThreshold=500, max_highThreshold=500;
-	//namedWindow("Edge threshold", CV_WINDOW_AUTOSIZE);
-	//createTrackbar( "Min Threshold:", "Edge threshold", &lowThreshold, max_lowThreshold);
-	//createTrackbar( "Max Threshold:", "Edge threshold", &highThreshold, max_highThreshold);
+	namedWindow("Edge threshold", CV_WINDOW_AUTOSIZE);
+	createTrackbar( "Min Threshold:", "Edge threshold", &lowThreshold, max_lowThreshold);
+	createTrackbar( "Max Threshold:", "Edge threshold", &highThreshold, max_highThreshold);
 
 	Mat edges;
 	while(true)
@@ -51,25 +53,13 @@ int main()
   		imshow(window_name.str(), img_segments[i]);
   		window_name.str("");
   	}*/
-  
 
 	vector<Vec4i> lines[n_segments];
 	int hough_threshold[5]={30, 30, 40, 50, 50};
 	int hough_minLineLength[5]={20, 25, 25, 30, 50};
 	for(i=0; i<n_segments ;i++)
-		{HoughLinesP(img_segments[i], lines[i], 1, CV_PI/180, hough_threshold[i], hough_minLineLength[i], 50 );
-         for(int j=0;j<lines[i].size();j++)
-          {
-            //take out unwanted near-horizontal lines that spoil the votes
-            
-             double m=((double)lines[i][j][3]-lines[i][j][1])/((double)lines[i][j][2]-lines[i][j][0]);
-            if((m<0.4&&m>0)||(m>-0.4&&m<0))
-            {
-             lines[i][j][1]=lines[i][j][3];
-             lines[i][j][0]=lines[i][j][2];
-             }
-          }
-    }
+		HoughLinesP(img_segments[i], lines[i], 1, CV_PI/180, hough_threshold[i], hough_minLineLength[i], 50 );
+
   	Mat line_segments[n_segments];
   	Mat empty=img-img;
   	extract_segments(line_segments, empty, segments, n_segments);
@@ -79,9 +69,7 @@ int main()
   		for(j=0;j<lines[i].size();j++)
   		{
   			Vec4i l = lines[i][j];
-        cout<<lines[i][j][1]<<endl;
-     
-        line( line_segments[i], Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
+  			line( line_segments[i], Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
   		}
 
 
@@ -182,7 +170,7 @@ int main()
   				if(1000-vanishRow>= vanish_row-20 && 1000-vanishRow<= vanish_row+20)
   				{
   					if(i==4)
-  						//cout<<"yay"<<j<<endl;
+  						cout<<"yay"<<j<<endl;
 
 
   					cv::line( lanes_segments[i], Point(lines[i][j][0], lines[i][j][1]), Point(lines[i][j][2], lines[i][j][3]), Scalar(255,0,0), 3, CV_AA, 0);

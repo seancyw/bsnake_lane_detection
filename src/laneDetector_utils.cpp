@@ -1,6 +1,6 @@
-#include"opencv/cv.h"
-#include<opencv2/highgui/highgui.hpp>
-#include<bits/stdc++.h>
+
+
+#include "../include/lane.hpp"
 
 using namespace std;
 using namespace cv;
@@ -19,17 +19,9 @@ int find_intersection(Vec4i l1, Vec4i l2)
 	c2=(double)l2[3]-m2*l2[2];
 
 	double yi, xi;
-	if(m1!=0||m2!=0)
-	
-	{
-		xi=(c1-c2)/(m2-m1);
-		yi=m2*xi+c2;
-	}
-	else
-	{
-		return 10000;
-	}	
 
+	xi=(c1-c2)/(m2-m1);
+	yi=m2*xi+c2;
 
 	//if lines are parallel and on road surface but orientation not correct
 	if(int(xi)<-200 || int(xi)>1200)
@@ -73,54 +65,24 @@ void merge_segments(Mat img_segments[],Mat img, int segments[], int n_segments)
 
 Mat find_edges(Mat img)
 {
-	//dynamic canny
-	
-	Mat edges;
-		cvtColor(img, img, CV_BGR2GRAY);
-		medianBlur(img, img, 9);
+	//directly in single channel
+	Mat edges, img_ycrcb, shadow_rem, shadow, ycrcb_channels[3];
 
-	/*int maxci,maxcj,count,maxcount;
-	maxci=-99;
-	maxcj=-99;
-	cout<<"hi"<<endl;
-	maxcount=-99;
-	for(int i=0;i<500;i++)
-		{
-			for(int j=i;j<500;j++)
-			{
-				count=0;
-				cout<<"hi2"<<endl;
-				Canny( img, edges, i, j, 3 );
-				vector<Vec4i> lines;
-				HoughLinesP(edges, lines, 1, CV_PI/180, 500, 100, 50 );
-				cout<<lines.size();		
-			for(int k=0;k<lines.size();k++)
-				{
-					double m=((double)lines[k][3]-lines[k][1])/((double)lines[k][2]-lines[k][0]);
-					if((m<0.4&&m>0)||(m>-0.4&&m<0))
-					{
-
-						count++;
-					}
-					if(count>maxcount)
-						{count=maxcount;
-							maxci=i;
-							maxcj=j;
-						}
-
-				}
-			}
-		}
+	/*cvtColor(img, img_ycrcb, CV_BGR2YCrCb);
+	split(img,ycrcb_channels);
+	shadow=ycrcb_channels[0];
+	imshow("shadows", shadow);
+	ycrcb_channels[0]=Mat::zeros(img.rows, img.cols, CV_8UC1);
+	merge(ycrcb_channels, 3, shadow_rem);
+	imshow("shadow removed", shadow_rem);
+	imshow("original", img);*/
 
 
-		cout<<maxci<<" "<<maxcj;
-		Canny( img, edges,maxci, maxcj, 3 );*/
-		Canny( img, edges, lowThreshold, highThreshold, 3 );
-
+	cvtColor(img, img, CV_BGR2GRAY);
 	imshow("bw", img);
-	
+	medianBlur(img, img, 9);
 	//blur(img,img,Size(3,3));
-	
+	Canny( img, edges, lowThreshold, highThreshold, 3 );
 	imshow("edges", edges);
 
 	//waitKey(0);
