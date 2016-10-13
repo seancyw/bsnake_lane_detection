@@ -25,6 +25,7 @@ This is the code for lane detection based on the bsnake paper by Wang et al.
 4. Estimation the mid-line of road and the parameter k by the detected road lines.
 ```
   $$k=c_right-c_left/r_mid-hz$$
+  \frac{1}{1+sin(x)}
 ```
 hz = vertical coordinate of the vanishing line
 
